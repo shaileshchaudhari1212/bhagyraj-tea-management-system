@@ -5,9 +5,14 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     zip
 
-RUN docker-php-ext-install zip
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+
+RUN docker-php-ext-install zip gd
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -15,7 +20,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN composer install
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 EXPOSE 10000
 
