@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+
 use App\Models\Sale;
 use App\Models\Dealer;
 use App\Models\Stock;
-use Illuminate\Http\Request;
 
-use Illuminate\Support\Facades\Mail;
-use App\Mail\InvoiceMail;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -21,8 +21,13 @@ class SaleController extends Controller
 
     public function index()
     {
-        $sales = Sale::with('dealer')
+        $sales = Sale::with([
+            'dealer',
+            'stock'
+        ])
+
             ->latest()
+
             ->get();
 
         return view(
@@ -63,35 +68,30 @@ class SaleController extends Controller
         $request->validate([
 
             'dealer_id' => 'required',
-
-            'tea_name' => 'required',
-
-            'quantity' => 'required',
-
-            'price_per_kg' => 'required',
+            'stock_id' => 'required',
+            'quantity' => 'required|numeric|min:1',
 
         ]);
 
-        $total = $request->quantity * $request->price_per_kg;
+        $stock = Stock::findOrFail(
+            $request->stock_id
+        );
+
+        $totalAmount =
+            $stock->selling_price *
+            $request->quantity;
 
         Sale::create([
 
-            'invoice_number' =>
-                'INV-' . strtoupper(uniqid()),
-
             'dealer_id' => $request->dealer_id,
 
-            'tea_name' => $request->tea_name,
+            'stock_id' => $request->stock_id,
 
             'quantity' => $request->quantity,
 
-            'price_per_kg' => $request->price_per_kg,
+            'price' => $stock->selling_price,
 
-            'total_amount' => $total,
-
-            'sale_date' => now(),
-
-            'email_sent' => 0,
+            'total_amount' => $totalAmount,
 
         ]);
 
@@ -99,20 +99,42 @@ class SaleController extends Controller
             ->route('sales.index')
             ->with(
                 'success',
-                'Sale Created Successfully'
+                'Sale Added Successfully'
             );
     }
 
     /*
     |--------------------------------------------------------------------------
-    | INVOICE PAGE
+    | DELETE SALE
+    |--------------------------------------------------------------------------
+    */
+
+    public function destroy($id)
+    {
+        $sale = Sale::findOrFail($id);
+
+        $sale->delete();
+
+        return redirect()
+            ->route('sales.index')
+            ->with(
+                'success',
+                'Sale Deleted Successfully'
+            );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | INVOICE VIEW
     |--------------------------------------------------------------------------
     */
 
     public function invoice($id)
     {
-        $sale = Sale::with('dealer')
-            ->findOrFail($id);
+        $sale = Sale::with([
+            'dealer',
+            'stock'
+        ])->findOrFail($id);
 
         return view(
             'admin.sales.invoice',
@@ -122,43 +144,24 @@ class SaleController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | SEND INVOICE MAIL
+    | DOWNLOAD PDF INVOICE
     |--------------------------------------------------------------------------
     */
 
-    public function sendMail($id)
+    public function downloadInvoice($id)
     {
-        $sale = Sale::with('dealer')
-            ->findOrFail($id);
+        $sale = Sale::with([
+            'dealer',
+            'stock'
+        ])->findOrFail($id);
 
-        try {
+        $pdf = Pdf::loadView(
+            'admin.sales.invoice-pdf',
+            compact('sale')
+        );
 
-            Mail::to($sale->dealer->email)
-                ->send(
-                    new InvoiceMail($sale)
-                );
-
-            $sale->update([
-
-                'email_sent' => 1
-
-            ]);
-
-            return redirect()
-                ->route('sales.index')
-                ->with(
-                    'success',
-                    'Invoice Email Sent Successfully'
-                );
-
-        } catch (\Exception $e) {
-
-            return redirect()
-                ->route('sales.index')
-                ->with(
-                    'error',
-                    'Email Sending Failed'
-                );
-        }
+        return $pdf->download(
+            'invoice-' . $sale->id . '.pdf'
+        );
     }
 }

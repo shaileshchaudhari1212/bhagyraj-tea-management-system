@@ -2,9 +2,13 @@
 
 @section('content')
 
-    <h1 class="text-4xl font-bold mb-8">
-        Stock Requests
-    </h1>
+    <div class="flex justify-between items-center mb-6">
+
+        <h1 class="text-4xl font-bold">
+            Stock Requests
+        </h1>
+
+    </div>
 
     @if(session('success'))
 
@@ -16,23 +20,33 @@
 
     @endif
 
-    <div class="bg-white p-6 rounded-2xl shadow mb-10">
+    @if(session('error'))
+
+        <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
+
+            {{ session('error') }}
+
+        </div>
+
+    @endif
+
+    <!-- REQUEST FORM -->
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-8">
 
         <form action="{{ route('dealer.requests.store') }}" method="POST">
 
             @csrf
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-3 gap-5">
 
                 <div>
 
-                    <label class="font-bold block mb-2">
-                        Tea Product
+                    <label class="block mb-2 font-semibold">
+                        Select Tea
                     </label>
 
-                    <select name="stock_id"
-                        class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                        required>
+                    <select name="stock_id" class="w-full border rounded-xl p-3" required>
 
                         <option value="">
                             Select Tea
@@ -54,30 +68,27 @@
 
                 <div>
 
-                    <label class="font-bold block mb-2">
-                        Quantity
+                    <label class="block mb-2 font-semibold">
+                        Quantity (KG)
                     </label>
 
-                    <input type="number" name="quantity"
-                        class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
-                        required>
+                    <input type="number" name="quantity" class="w-full border rounded-xl p-3" required>
+
+                </div>
+
+                <div>
+
+                    <label class="block mb-2 font-semibold">
+                        Notes
+                    </label>
+
+                    <input type="text" name="notes" class="w-full border rounded-xl p-3">
 
                 </div>
 
             </div>
 
-            <div class="mt-6">
-
-                <label class="font-bold block mb-2">
-                    Notes
-                </label>
-
-                <textarea name="notes" rows="4"
-                    class="w-full border border-gray-300 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-black"></textarea>
-
-            </div>
-
-            <button class="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl mt-6 transition">
+            <button type="submit" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
 
                 Send Request
 
@@ -87,111 +98,105 @@
 
     </div>
 
-    <div class="bg-white rounded-2xl shadow overflow-hidden">
+    <!-- REQUEST HISTORY -->
 
-        <div class="overflow-x-auto">
+    <div class="bg-white rounded-2xl shadow p-6 overflow-x-auto">
 
-            <table class="w-full min-w-[800px]">
+        <table class="w-full min-w-[900px]">
 
-                <thead class="bg-gray-100">
+            <thead>
 
-                    <tr>
+                <tr class="border-b text-left">
 
-                        <th class="text-left p-4 font-semibold">
-                            Tea
-                        </th>
+                    <th class="py-4">Tea</th>
+                    <th>Quantity</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                    <th>Date</th>
 
-                        <th class="text-left p-4 font-semibold">
-                            Quantity
-                        </th>
+                </tr>
 
-                        <th class="text-left p-4 font-semibold">
-                            Status
-                        </th>
+            </thead>
 
-                        <th class="text-left p-4 font-semibold">
-                            Date
-                        </th>
+            <tbody>
+
+                @forelse($requests as $request)
+
+                    <tr class="border-b">
+
+                        <td class="py-4">
+
+                            {{ $request->stock->tea_name ?? 'N/A' }}
+
+                        </td>
+
+                        <td>
+
+                            {{ $request->quantity }} KG
+
+                        </td>
+
+                        <td>
+
+                            {{ $request->notes }}
+
+                        </td>
+
+                        <td>
+
+                            @if($request->status == 'pending')
+
+                                <span class="bg-yellow-500 text-white px-3 py-1 rounded">
+
+                                    Pending
+
+                                </span>
+
+                            @elseif($request->status == 'approved')
+
+                                <span class="bg-green-500 text-white px-3 py-1 rounded">
+
+                                    Approved
+
+                                </span>
+
+                            @else
+
+                                <span class="bg-red-500 text-white px-3 py-1 rounded">
+
+                                    Rejected
+
+                                </span>
+
+                            @endif
+
+                        </td>
+
+                        <td>
+
+                            {{ $request->created_at->format('d M Y') }}
+
+                        </td>
 
                     </tr>
 
-                </thead>
+                @empty
 
-                <tbody>
+                    <tr>
 
-                    @forelse($requests as $request)
+                        <td colspan="5" class="text-center py-6 text-gray-500">
 
-                        <tr class="border-t hover:bg-gray-50 transition">
+                            No Requests Found
 
-                            <td class="p-4">
+                        </td>
 
-                                {{ $request->stock->tea_name }}
+                    </tr>
 
-                            </td>
+                @endforelse
 
-                            <td class="p-4">
+            </tbody>
 
-                                {{ $request->quantity }} KG
-
-                            </td>
-
-                            <td class="p-4">
-
-                                @if($request->status == 'pending')
-
-                                    <span class="bg-yellow-500 text-white px-4 py-1 rounded-full text-sm">
-
-                                        Pending
-
-                                    </span>
-
-                                @elseif($request->status == 'approved')
-
-                                    <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm">
-
-                                        Approved
-
-                                    </span>
-
-                                @else
-
-                                    <span class="bg-red-500 text-white px-4 py-1 rounded-full text-sm">
-
-                                        Rejected
-
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            <td class="p-4 text-gray-600">
-
-                                {{ $request->created_at->format('d M Y') }}
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-
-                            <td colspan="4" class="p-6 text-center text-gray-500">
-
-                                No Stock Requests Found
-
-                            </td>
-
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-
-            </table>
-
-        </div>
+        </table>
 
     </div>
 

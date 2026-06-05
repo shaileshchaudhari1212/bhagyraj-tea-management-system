@@ -29,7 +29,7 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN PANEL
+| AUTH REQUIRED
 |--------------------------------------------------------------------------
 */
 
@@ -37,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | DASHBOARD
+    | ADMIN DASHBOARD
     |--------------------------------------------------------------------------
     */
 
@@ -134,6 +134,12 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | PAYMENTS
+    |--------------------------------------------------------------------------
+    */
+
     Route::get(
         '/admin/payments',
         [PaymentController::class, 'index']
@@ -163,7 +169,7 @@ Route::middleware(['auth'])->group(function () {
         '/admin/payments/{id}',
         [PaymentController::class, 'destroy']
     )->name('payments.destroy');
-
+    
     /*
     |--------------------------------------------------------------------------
     | SALES
@@ -276,7 +282,7 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | DEALER PANEL
+    | DEALER DASHBOARD
     |--------------------------------------------------------------------------
     */
 
@@ -295,9 +301,11 @@ Route::middleware(['auth'])->group(function () {
         [DealerDashboardController::class, 'payments']
     )->name('dealer.payments');
 
+    
+
     /*
     |--------------------------------------------------------------------------
-    | DEALER STOCK REQUESTS
+    | DEALER REQUESTS
     |--------------------------------------------------------------------------
     */
 
@@ -306,15 +314,31 @@ Route::middleware(['auth'])->group(function () {
         [StockRequestController::class, 'index']
     )->name('dealer.requests.index');
 
-    Route::get(
-        '/dealer/requests/create',
-        [StockRequestController::class, 'create']
-    )->name('dealer.requests.create');
-
     Route::post(
         '/dealer/requests',
         [StockRequestController::class, 'store']
     )->name('dealer.requests.store');
+
+    Route::get(
+        '/dealer/stocks',
+        [DealerDashboardController::class, 'stocks']
+    )->name('dealer.stocks');
+
+
+    Route::get(
+    '/admin/payments/{id}/edit',
+    [PaymentController::class, 'edit']
+)->name('payments.edit');
+
+Route::put(
+    '/admin/payments/{id}',
+    [PaymentController::class, 'update']
+)->name('payments.update');
+
+Route::delete(
+    '/admin/payments/{id}',
+    [PaymentController::class, 'destroy']
+)->name('payments.destroy');
 
 });
 

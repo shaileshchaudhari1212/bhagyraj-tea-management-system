@@ -10,9 +10,9 @@
     <title>Bhagyraj Tea</title>
 
     <?php echo app('Illuminate\Foundation\Vite')([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ]); ?>
+    'resources/css/app.css',
+    'resources/js/app.js'
+]); ?>
 
 </head>
 
@@ -103,13 +103,15 @@
                         </span>
 
                         <form method="POST" action="<?php echo e(route('logout')); ?>">
-
+                        
                             <?php echo csrf_field(); ?>
-
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded transition">
+                        
+                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded transition">
+                        
                                 Logout
+                        
                             </button>
-
+                        
                         </form>
 
                     </div>

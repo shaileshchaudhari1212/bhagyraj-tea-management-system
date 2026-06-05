@@ -8,13 +8,17 @@
 
     </h1>
 
-    <div class="grid grid-cols-3 gap-5 mb-8">
+    <!-- SUMMARY CARDS -->
 
-        <div class="bg-green-500 text-white p-6 rounded-2xl">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
 
-            <p>Total Sales</p>
+        <div class="bg-green-500 text-white p-6 rounded-2xl shadow">
 
-            <h2 class="text-3xl font-bold">
+            <p class="text-lg">
+                Total Sales
+            </p>
+
+            <h2 class="text-3xl font-bold mt-2">
 
                 ₹ {{ number_format($totalSales, 2) }}
 
@@ -22,11 +26,13 @@
 
         </div>
 
-        <div class="bg-blue-500 text-white p-6 rounded-2xl">
+        <div class="bg-blue-500 text-white p-6 rounded-2xl shadow">
 
-            <p>Total Payments</p>
+            <p class="text-lg">
+                Total Payments
+            </p>
 
-            <h2 class="text-3xl font-bold">
+            <h2 class="text-3xl font-bold mt-2">
 
                 ₹ {{ number_format($totalPayments, 2) }}
 
@@ -34,11 +40,13 @@
 
         </div>
 
-        <div class="bg-red-500 text-white p-6 rounded-2xl">
+        <div class="bg-red-500 text-white p-6 rounded-2xl shadow">
 
-            <p>Remaining Balance</p>
+            <p class="text-lg">
+                Remaining Balance
+            </p>
 
-            <h2 class="text-3xl font-bold">
+            <h2 class="text-3xl font-bold mt-2">
 
                 ₹ {{ number_format($balance, 2) }}
 
@@ -48,6 +56,8 @@
 
     </div>
 
+    <!-- SALES HISTORY -->
+
     <div class="bg-white rounded-2xl shadow p-6 mb-8">
 
         <h2 class="text-2xl font-bold mb-5">
@@ -56,67 +66,109 @@
 
         </h2>
 
-        <table class="w-full">
+        <div class="overflow-x-auto">
 
-            <thead>
+            <table class="w-full">
 
-                <tr class="border-b">
+                <thead>
 
-                    <th class="py-3 text-left">Invoice</th>
-                    <th class="text-left">Tea</th>
-                    <th class="text-left">Qty</th>
-                    <th class="text-left">Total</th>
-                    <th class="text-left">Date</th>
+                    <tr class="border-b bg-gray-100">
 
-                </tr>
+                        <th class="py-3 px-3 text-left">
+                            Invoice
+                        </th>
 
-            </thead>
+                        <th class="py-3 px-3 text-left">
+                            Tea
+                        </th>
 
-            <tbody>
+                        <th class="py-3 px-3 text-left">
+                            Qty
+                        </th>
 
-                @foreach($sales as $sale)
+                        <th class="py-3 px-3 text-left">
+                            Price/KG
+                        </th>
 
-                    <tr class="border-b">
+                        <th class="py-3 px-3 text-left">
+                            Total
+                        </th>
 
-                        <td class="py-3">
-
-                            {{ $sale->invoice_no }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $sale->stock->tea_name }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $sale->quantity }} KG
-
-                        </td>
-
-                        <td>
-
-                            ₹ {{ number_format($sale->total_amount, 2) }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $sale->sale_date }}
-
-                        </td>
+                        <th class="py-3 px-3 text-left">
+                            Date
+                        </th>
 
                     </tr>
 
-                @endforeach
+                </thead>
 
-            </tbody>
+                <tbody>
 
-        </table>
+                    @forelse($sales as $sale)
+
+                        <tr class="border-b hover:bg-gray-50">
+
+                            <td class="py-3 px-3 font-semibold text-blue-600">
+
+                                {{ $sale->invoice_number ?? 'INV-' . strtoupper(substr(md5($sale->id), 0, 10)) }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ $sale->stock->tea_name ?? 'N/A' }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ $sale->quantity }} KG
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                ₹ {{ number_format($sale->price ?? ($sale->total_amount / max($sale->quantity, 1)), 2) }}
+
+                            </td>
+
+                            <td class="py-3 px-3 font-bold text-green-600">
+
+                                ₹ {{ number_format($sale->total_amount, 2) }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ \Carbon\Carbon::parse($sale->created_at)->format('d M Y') }}
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td colspan="6" class="py-6 text-center text-gray-500">
+
+                                No Sales Found
+
+                            </td>
+
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
+
+    <!-- PAYMENT HISTORY -->
 
     <div class="bg-white rounded-2xl shadow p-6">
 
@@ -126,58 +178,85 @@
 
         </h2>
 
-        <table class="w-full">
+        <div class="overflow-x-auto">
 
-            <thead>
+            <table class="w-full">
 
-                <tr class="border-b">
+                <thead>
 
-                    <th class="py-3 text-left">Amount</th>
-                    <th class="text-left">Type</th>
-                    <th class="text-left">Notes</th>
-                    <th class="text-left">Date</th>
+                    <tr class="border-b bg-gray-100">
 
-                </tr>
+                        <th class="py-3 px-3 text-left">
+                            Amount
+                        </th>
 
-            </thead>
+                        <th class="py-3 px-3 text-left">
+                            Type
+                        </th>
 
-            <tbody>
+                        <th class="py-3 px-3 text-left">
+                            Notes
+                        </th>
 
-                @foreach($payments as $payment)
-
-                    <tr class="border-b">
-
-                        <td class="py-3">
-
-                            ₹ {{ number_format($payment->amount, 2) }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $payment->payment_type }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $payment->notes }}
-
-                        </td>
-
-                        <td>
-
-                            {{ $payment->payment_date }}
-
-                        </td>
+                        <th class="py-3 px-3 text-left">
+                            Date
+                        </th>
 
                     </tr>
 
-                @endforeach
+                </thead>
 
-            </tbody>
+                <tbody>
 
-        </table>
+                    @forelse($payments as $payment)
+
+                        <tr class="border-b hover:bg-gray-50">
+
+                            <td class="py-3 px-3 font-bold text-green-600">
+
+                                ₹ {{ number_format($payment->amount, 2) }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ ucfirst($payment->payment_type) }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ $payment->notes ?? '-' }}
+
+                            </td>
+
+                            <td class="py-3 px-3">
+
+                                {{ \Carbon\Carbon::parse($payment->payment_date)->format('d M Y') }}
+
+                            </td>
+
+                        </tr>
+
+                    @empty
+
+                        <tr>
+
+                            <td colspan="4" class="py-6 text-center text-gray-500">
+
+                                No Payments Found
+
+                            </td>
+
+                        </tr>
+
+                    @endforelse
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 

@@ -22,7 +22,8 @@
 
         <!-- MOBILE OVERLAY -->
 
-        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden">
+        </div>
 
         <!-- SIDEBAR -->
 
@@ -37,20 +38,37 @@
 
             <nav class="p-6 space-y-2 text-lg">
 
-                <a href="/dealer/dashboard" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+                <a href="{{ route('dealer.dashboard') }}" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+
                     Dashboard
+
                 </a>
 
-                <a href="/dealer/invoices" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+                <a href="{{ route('dealer.invoices') }}" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+
                     My Invoices
+
                 </a>
 
-                <a href="/dealer/payments" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+                <a href="{{ route('dealer.payments') }}" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+
                     Payment History
+
                 </a>
 
-                <a href="/dealer/requests" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+                <!-- NEW AVAILABLE STOCK -->
+
+                <a href="{{ route('dealer.stocks') }}" class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+
+                    Available Stock
+
+                </a>
+
+                <a href="{{ route('dealer.requests.index') }}"
+                    class="block px-4 py-3 rounded hover:bg-gray-800 transition">
+
                     Stock Requests
+
                 </a>
 
             </nav>
@@ -70,11 +88,15 @@
                     <div class="flex items-center gap-4">
 
                         <button id="menuBtn" class="md:hidden bg-black text-white px-3 py-2 rounded">
+
                             ☰
+
                         </button>
 
                         <h1 class="text-2xl font-bold">
+
                             Dealer Panel
+
                         </h1>
 
                     </div>
@@ -83,7 +105,7 @@
 
                         <span class="font-semibold">
 
-                            {{ auth()->user()->name }}
+                            {{ auth()->user()->name ?? 'Dealer' }}
 
                         </span>
 
@@ -92,7 +114,9 @@
                             @csrf
 
                             <button class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded transition">
+
                                 Logout
+
                             </button>
 
                         </form>
@@ -109,9 +133,19 @@
 
                 @if(session('success'))
 
-                    <div class="bg-green-100 text-green-700 p-4 rounded mb-8">
+                    <div class="bg-green-100 text-green-700 p-4 rounded mb-6">
 
                         {{ session('success') }}
+
+                    </div>
+
+                @endif
+
+                @if(session('error'))
+
+                    <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
+
+                        {{ session('error') }}
 
                     </div>
 
@@ -133,21 +167,29 @@
 
         const menuBtn = document.getElementById('menuBtn');
 
-        menuBtn.addEventListener('click', () => {
+        if (menuBtn) {
 
-            sidebar.classList.remove('-translate-x-full');
+            menuBtn.addEventListener('click', () => {
 
-            overlay.classList.remove('hidden');
+                sidebar.classList.remove('-translate-x-full');
 
-        });
+                overlay.classList.remove('hidden');
 
-        overlay.addEventListener('click', () => {
+            });
 
-            sidebar.classList.add('-translate-x-full');
+        }
 
-            overlay.classList.add('hidden');
+        if (overlay) {
 
-        });
+            overlay.addEventListener('click', () => {
+
+                sidebar.classList.add('-translate-x-full');
+
+                overlay.classList.add('hidden');
+
+            });
+
+        }
 
     </script>
 

@@ -67,38 +67,6 @@ class DealerController extends Controller
         return view('admin.dealers.create');
     }
 
-    public function ledger($id)
-    {
-        $dealer = Dealer::findOrFail($id);
-
-        $sales = Sale::with('stock')
-            ->where('dealer_id', auth()->user()->dealer->id)
-            ->latest()
-            ->get();
-        $payments = Payment::where(
-            'dealer_id',
-            $id
-        )->latest()->get();
-
-        $totalSales = $sales->sum('total_amount');
-
-        $totalPayments = $payments->sum('amount');
-
-        $balance = $totalSales - $totalPayments;
-
-        return view(
-            'admin.dealers.ledger',
-            compact(
-                'dealer',
-                'sales',
-                'payments',
-                'totalSales',
-                'totalPayments',
-                'balance'
-            )
-        );
-    }
-
     /*
     |--------------------------------------------------------------------------
     | STORE DEALER
@@ -201,12 +169,55 @@ class DealerController extends Controller
             );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | DEALER LEDGER
+    |--------------------------------------------------------------------------
+    */
+
+    public function ledger($id)
+    {
+        $dealer = Dealer::findOrFail($id);
+
+        $sales = Sale::with('stock')
+            ->where('dealer_id', $dealer->id)
+            ->latest()
+            ->get();
+
+        $payments = Payment::where(
+            'dealer_id',
+            $dealer->id
+        )->latest()->get();
+
+        $totalSales = $sales->sum('total_amount');
+
+        $totalPayments = $payments->sum('amount');
+
+        $balance = $totalSales - $totalPayments;
+
+        return view(
+            'admin.dealers.ledger',
+            compact(
+                'dealer',
+                'sales',
+                'payments',
+                'totalSales',
+                'totalPayments',
+                'balance'
+            )
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEALER INVOICE
+    |--------------------------------------------------------------------------
+    */
+
     public function invoice($id)
     {
-        $sale = \App\Models\Sale::where(
-            'dealer_id',
-            auth()->user()->dealer->id
-        )->findOrFail($id);
+        $sale = Sale::with('stock')
+            ->findOrFail($id);
 
         return view(
             'dealer.invoice',
@@ -239,11 +250,4 @@ class DealerController extends Controller
                 'Dealer Deleted Successfully'
             );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DEALER LEDGER
-    |--------------------------------------------------------------------------
-    */
-
 }

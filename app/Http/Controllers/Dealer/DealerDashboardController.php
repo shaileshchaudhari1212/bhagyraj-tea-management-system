@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dealer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dealer;
+use App\Models\Stock;
+
 use Illuminate\Support\Facades\Auth;
 
 class DealerDashboardController extends Controller
@@ -20,6 +22,18 @@ class DealerDashboardController extends Controller
             'email',
             Auth::user()->email
         )->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | IF DEALER NOT FOUND
+        |--------------------------------------------------------------------------
+        */
+
+        if (!$dealer) {
+
+            abort(404, 'Dealer not found');
+
+        }
 
         $sales = $dealer->sales()
             ->with('stock')
@@ -63,6 +77,12 @@ class DealerDashboardController extends Controller
             Auth::user()->email
         )->first();
 
+        if (!$dealer) {
+
+            abort(404, 'Dealer not found');
+
+        }
+
         $sales = $dealer->sales()
             ->with('stock')
             ->latest()
@@ -87,6 +107,12 @@ class DealerDashboardController extends Controller
             Auth::user()->email
         )->first();
 
+        if (!$dealer) {
+
+            abort(404, 'Dealer not found');
+
+        }
+
         $payments = $dealer->payments()
             ->latest()
             ->get();
@@ -94,6 +120,22 @@ class DealerDashboardController extends Controller
         return view(
             'dealer.payments',
             compact('payments')
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | AVAILABLE STOCK
+    |--------------------------------------------------------------------------
+    */
+
+    public function stocks()
+    {
+        $stocks = Stock::latest()->get();
+
+        return view(
+            'dealer.stocks.index',
+            compact('stocks')
         );
     }
 }

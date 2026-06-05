@@ -6,6 +6,26 @@
         Dealer Stock Requests
     </h1>
 
+    @if(session('success'))
+
+        <div class="bg-green-100 text-green-700 p-4 rounded mb-6">
+
+            {{ session('success') }}
+
+        </div>
+
+    @endif
+
+    @if(session('error'))
+
+        <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
+
+            {{ session('error') }}
+
+        </div>
+
+    @endif
+
     <div class="bg-white rounded-2xl shadow p-6 overflow-x-auto">
 
         <table class="w-full min-w-[1000px]">
@@ -29,56 +49,69 @@
 
                 @foreach($requests as $request)
 
-                    <tr class="border-b">
+                        <tr class="border-b">
 
-                        <td class="py-4">
-                            {{ $request->dealer->name }}
-                        </td>
+                            <td class="py-4">
+                                {{ $request->dealer->name }}
+                            </td>
 
-                        <td>
-                            {{ $request->stock->tea_name }}
-                        </td>
+                            <td>
+                                {{ $request->stock->tea_name }}
+                            </td>
 
-                        <td>
-                            {{ $request->quantity }} KG
-                        </td>
+                            <td>
+                                {{ $request->quantity }} KG
+                            </td>
 
-                        <td>
-                            {{ $request->notes }}
-                        </td>
+                            <td>
+                                {{ $request->notes }}
+                            </td>
 
-                        <td>
+                            <td>
 
-                            <span class="bg-green-500 text-white px-3 py-1 rounded">
+                                <span class="
+                                            px-3 py-1 rounded text-white
+                                            {{ strtolower($request->status) == 'pending'
+                    ? 'bg-yellow-500'
+                    : 'bg-green-500' }}
+                                        ">
 
-                                {{ $request->status }}
-
-                            </span>
-
-                        </td>
-
-                        <td>
-
-                            @if($request->status == 'Pending')
-
-                                <a href="{{ route('admin.requests.approve', $request->id) }}"
-                                    class="bg-black text-white px-4 py-2 rounded">
-                                    Approve
-                                </a>
-
-                            @else
-
-                                <span class="text-gray-500">
-
-                                    Completed
+                                    {{ $request->status }}
 
                                 </span>
 
-                            @endif
+                            </td>
 
-                        </td>
+                            <td>
 
-                    </tr>
+                                @if(strtolower($request->status) == 'pending')
+
+                                    <form action="{{ route('admin.requests.approve', $request->id) }}" method="POST">
+
+                                        @csrf
+
+                                        <button type="submit"
+                                            class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition">
+
+                                            Approve
+
+                                        </button>
+
+                                    </form>
+
+                                @else
+
+                                    <span class="text-gray-500">
+
+                                        Completed
+
+                                    </span>
+
+                                @endif
+
+                            </td>
+
+                        </tr>
 
                 @endforeach
 

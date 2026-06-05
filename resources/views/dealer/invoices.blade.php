@@ -72,11 +72,9 @@
 
                             <td class="p-6">
 
-                                <a href="{{ route('dealer.invoice', $sale->id) }}" target="_blank"
+                                <a href="{{ route('dealer.invoice', $sale->id) }}"
                                     class="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-lg transition">
-
                                     View
-
                                 </a>
 
                             </td>
