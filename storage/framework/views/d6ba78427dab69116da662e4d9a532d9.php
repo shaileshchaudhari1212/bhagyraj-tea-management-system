@@ -1,6 +1,6 @@
-@extends('layouts.admin')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
 
     <h1 class="text-4xl font-bold mb-6">
 
@@ -20,7 +20,8 @@
 
             <h2 class="text-3xl font-bold mt-2">
 
-                ₹ {{ number_format($totalSales, 2) }}
+                ₹ <?php echo e(number_format($totalSales, 2)); ?>
+
 
             </h2>
 
@@ -34,7 +35,8 @@
 
             <h2 class="text-3xl font-bold mt-2">
 
-                ₹ {{ number_format($totalPayments, 2) }}
+                ₹ <?php echo e(number_format($totalPayments, 2)); ?>
+
 
             </h2>
 
@@ -48,7 +50,8 @@
 
             <h2 class="text-3xl font-bold mt-2">
 
-                ₹ {{ number_format($balance, 2) }}
+                ₹ <?php echo e(number_format($balance, 2)); ?>
+
 
             </h2>
 
@@ -116,55 +119,61 @@
 
                 <tbody>
 
-                    @forelse($sales as $sale)
+                    <?php $__empty_1 = true; $__currentLoopData = $sales; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sale): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                         <tr class="border-b hover:bg-gray-50">
 
                             <td class="py-3 px-3 font-semibold text-blue-600">
 
-                                {{ $sale->invoice_number ?? 'INV-' . strtoupper(substr(md5($sale->id), 0, 10)) }}
+                                <?php echo e($sale->invoice_number ?? 'INV-' . strtoupper(substr(md5($sale->id), 0, 10))); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ $sale->stock->tea_name ?? 'N/A' }}
+                                <?php echo e($sale->stock->tea_name ?? 'N/A'); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ $sale->quantity }} KG
+                                <?php echo e($sale->quantity); ?> KG
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                ₹ {{ number_format($sale->price ?? ($sale->total_amount / max($sale->quantity, 1)), 2) }}
+                                ₹ <?php echo e(number_format($sale->price ?? ($sale->total_amount / max($sale->quantity, 1)), 2)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3 font-bold text-black">
 
-                                ₹ {{ number_format($sale->total_amount, 2) }}
+                                ₹ <?php echo e(number_format($sale->total_amount, 2)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3 text-green-600 font-bold">
 
-                                ₹ {{ number_format($sale->paid_amount, 2) }}
+                                ₹ <?php echo e(number_format($sale->paid_amount, 2)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3 text-red-600 font-bold">
 
-                                ₹ {{ number_format($sale->pending_amount, 2) }}
+                                ₹ <?php echo e(number_format($sale->pending_amount, 2)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                @if($sale->payment_status == 'Paid')
+                                <?php if($sale->payment_status == 'Paid'): ?>
 
                                     <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">
 
@@ -172,7 +181,7 @@
 
                                     </span>
 
-                                @elseif($sale->payment_status == 'Partial')
+                                <?php elseif($sale->payment_status == 'Partial'): ?>
 
                                     <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm">
 
@@ -180,7 +189,7 @@
 
                                     </span>
 
-                                @else
+                                <?php else: ?>
 
                                     <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
 
@@ -188,19 +197,20 @@
 
                                     </span>
 
-                                @endif
+                                <?php endif; ?>
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ \Carbon\Carbon::parse($sale->created_at)->format('d M Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($sale->created_at)->format('d M Y')); ?>
+
 
                             </td>
 
                         </tr>
 
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <tr>
 
@@ -212,7 +222,7 @@
 
                         </tr>
 
-                    @endforelse
+                    <?php endif; ?>
 
                 </tbody>
 
@@ -262,37 +272,41 @@
 
                 <tbody>
 
-                    @forelse($payments as $payment)
+                    <?php $__empty_1 = true; $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
 
                         <tr class="border-b hover:bg-gray-50">
 
                             <td class="py-3 px-3 font-bold text-green-600">
 
-                                ₹ {{ number_format($payment->amount, 2) }}
+                                ₹ <?php echo e(number_format($payment->amount, 2)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ ucfirst($payment->payment_type) }}
+                                <?php echo e(ucfirst($payment->payment_type)); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ $payment->notes ?? '-' }}
+                                <?php echo e($payment->notes ?? '-'); ?>
+
 
                             </td>
 
                             <td class="py-3 px-3">
 
-                                {{ \Carbon\Carbon::parse($payment->payment_date)->format('d M Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($payment->payment_date)->format('d M Y')); ?>
+
 
                             </td>
 
                         </tr>
 
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <tr>
 
@@ -304,7 +318,7 @@
 
                         </tr>
 
-                    @endforelse
+                    <?php endif; ?>
 
                 </tbody>
 
@@ -314,4 +328,5 @@
 
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\bhagyraj-tea\resources\views/admin/dealers/ledger.blade.php ENDPATH**/ ?>

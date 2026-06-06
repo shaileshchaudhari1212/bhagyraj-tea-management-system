@@ -181,19 +181,54 @@ class DealerController extends Controller
 
         $sales = Sale::with('stock')
             ->where('dealer_id', $dealer->id)
-            ->latest()
+            ->oldest()
             ->get();
 
         $payments = Payment::where(
             'dealer_id',
             $dealer->id
-        )->latest()->get();
+        )->oldest()->get();
 
         $totalSales = $sales->sum('total_amount');
 
         $totalPayments = $payments->sum('amount');
 
         $balance = $totalSales - $totalPayments;
+
+        $remainingPayment = $totalPayments;
+
+        foreach ($sales as $sale) {
+
+            if ($remainingPayment >= $sale->total_amount) {
+
+                $sale->paid_amount = $sale->total_amount;
+
+                $sale->pending_amount = 0;
+
+                $sale->payment_status = 'Paid';
+
+                $remainingPayment -= $sale->total_amount;
+
+            } elseif ($remainingPayment > 0) {
+
+                $sale->paid_amount = $remainingPayment;
+
+                $sale->pending_amount =
+                    $sale->total_amount - $remainingPayment;
+
+                $sale->payment_status = 'Partial';
+
+                $remainingPayment = 0;
+
+            } else {
+
+                $sale->paid_amount = 0;
+
+                $sale->pending_amount = $sale->total_amount;
+
+                $sale->payment_status = 'Pending';
+            }
+        }
 
         return view(
             'admin.dealers.ledger',
