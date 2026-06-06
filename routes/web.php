@@ -222,10 +222,6 @@ Route::middleware(['auth'])->group(function () {
         [SaleController::class, 'sendMail']
     )->name('sales.send.mail');
 
-    Route::post(
-        '/admin/sales/send-mail/{id}',
-        [SaleController::class, 'sendMail']
-    )->name('sales.send.mail');
 
     /*
     |--------------------------------------------------------------------------
