@@ -10,16 +10,6 @@
 
     </div>
 
-    @if(session('success'))
-
-        <div class="bg-green-100 text-green-700 p-4 rounded mb-6">
-
-            {{ session('success') }}
-
-        </div>
-
-    @endif
-
     @if(session('error'))
 
         <div class="bg-red-100 text-red-700 p-4 rounded mb-6">
@@ -30,73 +20,116 @@
 
     @endif
 
-    <!-- REQUEST FORM -->
+    {{-- ACCOUNT INACTIVE WARNING --}}
+    @if($dealer->status === 'inactive')
 
-    <div class="bg-white rounded-2xl shadow p-6 mb-8">
+        <div class="bg-yellow-100 border-l-8 border-yellow-500 text-yellow-900 rounded-2xl p-6 mb-8 shadow">
 
-        <form action="{{ route('dealer.requests.store') }}" method="POST">
+            <div class="flex items-start gap-4">
 
-            @csrf
-
-            <div class="grid md:grid-cols-3 gap-5">
-
-                <div>
-
-                    <label class="block mb-2 font-semibold">
-                        Select Tea
-                    </label>
-
-                    <select name="stock_id" class="w-full border rounded-xl p-3" required>
-
-                        <option value="">
-                            Select Tea
-                        </option>
-
-                        @foreach($stocks as $stock)
-
-                            <option value="{{ $stock->id }}">
-
-                                {{ $stock->tea_name }}
-
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
+                <div class="text-4xl">
+                    ⚠️
                 </div>
 
                 <div>
 
-                    <label class="block mb-2 font-semibold">
-                        Quantity (KG)
-                    </label>
+                    <h2 class="text-2xl font-bold mb-2">
 
-                    <input type="number" name="quantity" class="w-full border rounded-xl p-3" required>
+                        Your account has been deactivated.
 
-                </div>
+                    </h2>
 
-                <div>
+                    <p>
 
-                    <label class="block mb-2 font-semibold">
-                        Notes
-                    </label>
+                        Please contact
+                        <strong>Bhagyraj Tea Administration</strong>.
 
-                    <input type="text" name="notes" class="w-full border rounded-xl p-3">
+                    </p>
+
+                    <p class="mt-2">
+
+                        You can still view your previous requests,
+                        but you cannot create new stock requests.
+
+                    </p>
 
                 </div>
 
             </div>
 
-            <button type="submit" class="mt-6 bg-black text-white px-6 py-3 rounded-xl">
+        </div>
 
-                Send Request
+    @else
 
-            </button>
+        <!-- REQUEST FORM -->
 
-        </form>
+        <div class="bg-white rounded-2xl shadow p-6 mb-8">
 
-    </div>
+            <form action="{{ route('dealer.requests.store') }}" method="POST">
+
+                @csrf
+
+                <div class="grid md:grid-cols-3 gap-5">
+
+                    <div>
+
+                        <label class="block mb-2 font-semibold">
+                            Select Tea
+                        </label>
+
+                        <select name="stock_id" class="w-full border rounded-xl p-3" required>
+
+                            <option value="">
+                                Select Tea
+                            </option>
+
+                            @foreach($stocks as $stock)
+
+                                <option value="{{ $stock->id }}">
+
+                                    {{ $stock->tea_name }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+                    <div>
+
+                        <label class="block mb-2 font-semibold">
+                            Quantity (KG)
+                        </label>
+
+                        <input type="number" name="quantity" class="w-full border rounded-xl p-3" required>
+
+                    </div>
+
+                    <div>
+
+                        <label class="block mb-2 font-semibold">
+                            Notes
+                        </label>
+
+                        <input type="text" name="notes" class="w-full border rounded-xl p-3">
+
+                    </div>
+
+                </div>
+
+                <button type="submit" class="mt-6 bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-xl">
+
+                    Send Request
+
+                </button>
+
+            </form>
+
+        </div>
+
+    @endif
 
     <!-- REQUEST HISTORY -->
 
@@ -108,11 +141,25 @@
 
                 <tr class="border-b text-left">
 
-                    <th class="py-4">Tea</th>
-                    <th>Quantity</th>
-                    <th>Notes</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                    <th class="py-4">
+                        Tea
+                    </th>
+
+                    <th>
+                        Quantity
+                    </th>
+
+                    <th>
+                        Notes
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
 
                 </tr>
 

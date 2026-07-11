@@ -12,8 +12,10 @@ use App\Http\Controllers\Admin\ActivityLogController;
 
 use App\Http\Controllers\Dealer\DealerDashboardController;
 use App\Http\Controllers\Dealer\StockRequestController;
+use App\Http\Controllers\Dealer\ChangePasswordController;
 
 use App\Http\Controllers\Admin\StockRequestController as AdminStockRequestController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +37,8 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
 
+
+
     /*
     |--------------------------------------------------------------------------
     | ADMIN DASHBOARD
@@ -45,6 +49,8 @@ Route::middleware(['auth'])->group(function () {
         '/admin/dashboard',
         [DashboardController::class, 'index']
     )->name('admin.dashboard');
+
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -278,14 +284,65 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | DEALER DASHBOARD
+    | DEALER CHANGE PASSWORD
     |--------------------------------------------------------------------------
     */
 
     Route::get(
-        '/dealer/dashboard',
-        [DealerDashboardController::class, 'dashboard']
-    )->name('dealer.dashboard');
+        '/dealer/change-password',
+        [ChangePasswordController::class, 'index']
+    )->name('dealer.password.change');
+
+    Route::post(
+        '/dealer/change-password',
+        [ChangePasswordController::class, 'update']
+    )->name('dealer.password.update');
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEALER DASHBOARD
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['force.password.change'])->group(function () {
+
+        Route::get(
+            '/dealer/dashboard',
+            [DealerDashboardController::class, 'dashboard']
+        )->name('dealer.dashboard');
+
+        Route::get(
+            '/dealer/invoices',
+            [DealerDashboardController::class, 'invoices']
+        )->name('dealer.invoices');
+
+        Route::get(
+            '/dealer/payments',
+            [DealerDashboardController::class, 'payments']
+        )->name('dealer.payments');
+
+        Route::middleware([
+            'dealer.active'
+        ])->group(function () {
+
+            Route::get(
+                '/dealer/requests',
+                [StockRequestController::class, 'index']
+            )->name('dealer.requests.index');
+
+            Route::post(
+                '/dealer/requests',
+                [StockRequestController::class, 'store']
+            )->name('dealer.requests.store');
+
+        });
+
+        Route::get(
+            '/dealer/stocks',
+            [DealerDashboardController::class, 'stocks']
+        )->name('dealer.stocks');
+
+    });
 
     Route::get(
         '/dealer/invoices',

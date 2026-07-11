@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Dealer;
 
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
 
 use App\Models\Stock;
@@ -20,30 +19,12 @@ class StockRequestController extends Controller
 
     public function index()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | GET LOGGED IN USER
-        |--------------------------------------------------------------------------
-        */
-
         $user = auth()->user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | FIND DEALER
-        |--------------------------------------------------------------------------
-        */
 
         $dealer = Dealer::where(
             'user_id',
             $user->id
         )->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | IF DEALER NOT FOUND
-        |--------------------------------------------------------------------------
-        */
 
         if (!$dealer) {
 
@@ -51,44 +32,22 @@ class StockRequestController extends Controller
 
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | GET STOCKS
-        |--------------------------------------------------------------------------
-        */
-
         $stocks = Stock::latest()->get();
 
-        /*
-        |--------------------------------------------------------------------------
-        | GET REQUESTS
-        |--------------------------------------------------------------------------
-        */
-
         $requests = StockRequest::with([
-
             'stock'
-
         ])
-
             ->where(
                 'dealer_id',
                 $dealer->id
             )
-
             ->latest()
-
             ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | RETURN VIEW
-        |--------------------------------------------------------------------------
-        */
 
         return view(
             'dealer.requests.index',
             compact(
+                'dealer',
                 'stocks',
                 'requests'
             )
@@ -103,12 +62,6 @@ class StockRequestController extends Controller
 
     public function store(Request $request)
     {
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDATION
-        |--------------------------------------------------------------------------
-        */
-
         $request->validate([
 
             'stock_id' => 'required',
@@ -117,30 +70,12 @@ class StockRequestController extends Controller
 
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | GET LOGGED IN USER
-        |--------------------------------------------------------------------------
-        */
-
         $user = auth()->user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | FIND DEALER
-        |--------------------------------------------------------------------------
-        */
 
         $dealer = Dealer::where(
             'user_id',
             $user->id
         )->first();
-
-        /*
-        |--------------------------------------------------------------------------
-        | IF DEALER NOT FOUND
-        |--------------------------------------------------------------------------
-        */
 
         if (!$dealer) {
 
@@ -150,39 +85,34 @@ class StockRequestController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | CREATE REQUEST
+        | EXTRA SECURITY
         |--------------------------------------------------------------------------
         */
+
+        if ($dealer->status !== 'active') {
+
+            return redirect()
+                ->route('dealer.requests.index')
+                ->with(
+                    'error',
+                    'Your account is inactive. Please contact Bhagyraj Tea Administration.'
+                );
+
+        }
 
         StockRequest::create([
 
-            'dealer_id' =>
+            'dealer_id' => $dealer->id,
 
-                $dealer->id,
+            'stock_id' => $request->stock_id,
 
-            'stock_id' =>
+            'quantity' => $request->quantity,
 
-                $request->stock_id,
+            'notes' => $request->notes,
 
-            'quantity' =>
-
-                $request->quantity,
-
-            'notes' =>
-
-                $request->notes,
-
-            'status' =>
-
-                'pending',
+            'status' => 'pending',
 
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
 
         return redirect()
             ->route('dealer.requests.index')

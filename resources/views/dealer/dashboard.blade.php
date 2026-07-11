@@ -6,6 +6,41 @@
         Dealer Dashboard
     </h1>
 
+    {{-- ACCOUNT INACTIVE WARNING --}}
+    @if($dealer->status === 'inactive')
+
+        <div class="mb-8 bg-yellow-100 border-l-8 border-yellow-500 text-yellow-900 rounded-2xl p-6 shadow">
+
+            <div class="flex items-start gap-4">
+
+                <div class="text-4xl">
+                    ⚠️
+                </div>
+
+                <div>
+
+                    <h2 class="text-2xl font-bold mb-2">
+                        Your account has been deactivated.
+                    </h2>
+
+                    <p class="text-lg">
+                        Please contact <strong>Bhagyraj Tea Administration</strong>.
+                    </p>
+
+                    <p class="mt-3">
+                        You can continue viewing your invoices and payment history,
+                        but you cannot create new stock requests until your account
+                        is activated again.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    @endif
+
     <!-- STATS -->
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -256,4 +291,4 @@
 
     </div>
 
-@endsection
+@endsection 

@@ -62,6 +62,22 @@ class AuthenticatedSessionController extends Controller
             auth()->user()->role === 'dealer'
         ) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | FORCE PASSWORD CHANGE
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                auth()->user()->must_change_password
+            ) {
+
+                return redirect()->route(
+                    'dealer.password.change'
+                );
+
+            }
+
             return redirect()
                 ->route('dealer.dashboard');
 
@@ -98,5 +114,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+
     }
 }

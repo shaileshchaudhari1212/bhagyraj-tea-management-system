@@ -2,201 +2,198 @@
 
 @section('content')
 
-    <div class="flex justify-between items-center mb-8">
+<div class="flex justify-between items-center mb-8">
 
-        <h1 class="text-4xl font-bold text-gray-800">
-            Sales Management
-        </h1>
+    <h1 class="text-4xl font-bold text-gray-800">
+        Sales Management
+    </h1>
 
-        <a href="{{ route('sales.create') }}" class="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-2xl shadow">
+    <a href="{{ route('sales.create') }}"
+        class="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-2xl shadow">
 
-            Create Sale
+        Create Sale
 
-        </a>
+    </a>
+
+</div>
+
+
+@if(session('error'))
+
+    <div class="bg-red-100 border border-red-300 text-red-700 px-5 py-4 rounded-xl mb-6">
+
+        {{ session('error') }}
 
     </div>
 
+@endif
 
-    @if(session('error'))
+<div class="bg-white rounded-3xl shadow overflow-hidden">
 
-        <div class="bg-red-100 border border-red-300 text-red-700 px-5 py-4 rounded-xl mb-6">
+    <div class="overflow-x-auto">
 
-            {{ session('error') }}
+        <table class="w-full">
 
-        </div>
+            <thead class="bg-gray-50">
 
-    @endif
+                <tr>
 
-    <div class="bg-white rounded-3xl shadow overflow-hidden">
+                    <th class="p-5 text-left">
+                        Invoice No
+                    </th>
 
-        <div class="overflow-x-auto">
+                    <th class="p-5 text-left">
+                        Dealer
+                    </th>
 
-            <table class="w-full">
+                    <th class="p-5 text-left">
+                        Email Status
+                    </th>
 
-                <thead class="bg-gray-50">
+                    <th class="p-5 text-left">
+                        Tea
+                    </th>
 
-                    <tr>
+                    <th class="p-5 text-left">
+                        Qty
+                    </th>
 
-                        <th class="p-5 text-left">
-                            Invoice No
-                        </th>
+                    <th class="p-5 text-left">
+                        Price/KG
+                    </th>
 
-                        <th class="p-5 text-left">
-                            Dealer
-                        </th>
+                    <th class="p-5 text-left">
+                        Total
+                    </th>
 
-                        <th class="p-5 text-left">
-                            Email Status
-                        </th>
+                    <th class="p-5 text-left">
+                        Date
+                    </th>
 
-                        <th class="p-5 text-left">
-                            Tea
-                        </th>
+                    <th class="p-5 text-left">
+                        Action
+                    </th>
 
-                        <th class="p-5 text-left">
-                            Qty
-                        </th>
+                </tr>
 
-                        <th class="p-5 text-left">
-                            Price/KG
-                        </th>
+            </thead>
 
-                        <th class="p-5 text-left">
-                            Total
-                        </th>
+            <tbody>
 
-                        <th class="p-5 text-left">
-                            Date
-                        </th>
+                @forelse($sales as $sale)
 
-                        <th class="p-5 text-left">
-                            Action
-                        </th>
+                    <tr class="border-t hover:bg-gray-50 transition">
 
-                    </tr>
+                        <td class="p-5 font-semibold text-gray-700">
 
-                </thead>
+                            {{ $sale->invoice_number }}
 
-                <tbody>
+                        </td>
 
-                    @foreach($sales as $sale)
+                        <td class="p-5">
 
-                        <tr class="border-t hover:bg-gray-50 transition">
+                            {{ $sale->dealer->name }}
 
-                            <td class="p-5 font-semibold text-gray-700">
+                        </td>
 
-                                {{ $sale->invoice_number }}
+                        <td class="p-5">
 
-                            </td>
+                            @if($sale->email_sent)
 
-                            <td class="p-5">
+                                <div class="flex items-center gap-3">
 
-                                {{ $sale->dealer->name }}
+                                    <span
+                                        class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
 
-                            </td>
+                                        Email Sent
 
-                            <td class="p-5">
+                                    </span>
 
-                                @if($sale->email_sent)
+                                    <a href="{{ route('sales.send.mail', $sale->id) }}"
+                                        class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm">
 
-                                    <div class="flex items-center gap-3">
+                                        Send Again
 
-                                        <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm">
+                                    </a>
 
-                                            Email Sent
+                                </div>
 
-                                        </span>
+                            @else
 
-                                        <form action="{{ route('sales.send.mail', $sale->id) }}" method="POST">
+                                <a href="{{ route('sales.send.mail', $sale->id) }}"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
 
-                                            @csrf
-
-                                            <button type="submit"
-                                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm">
-
-                                                Send Again
-
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                @else
-
-                                    <div class="flex items-center gap-3">
-
-
-                                        <form action="{{ route('sales.send.mail', $sale->id) }}" method="POST">
-
-                                            @csrf
-
-                                            <button type="submit"
-                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-
-                                                Send Mail
-
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                @endif
-
-                            </td>
-
-                            <td class="p-5">
-
-                                {{ $sale->stock->tea_name }}
-
-                            </td>
-
-                            <td class="p-5">
-
-                                {{ $sale->quantity }} KG
-
-                            </td>
-
-                            <td class="p-5">
-
-                                ₹ {{ number_format($sale->price_per_kg, 2) }}
-
-                            </td>
-
-                            <td class="p-5 font-bold text-green-600">
-
-                                ₹ {{ number_format($sale->total_amount, 2) }}
-
-                            </td>
-
-                            <td class="p-5">
-
-                                {{ $sale->sale_date }}
-
-                            </td>
-
-                            <td class="p-5">
-
-                                <a href="{{ route('sales.invoice', $sale->id) }}"
-                                    class="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-xl">
-
-                                    Invoice
+                                    Send Mail
 
                                 </a>
 
-                            </td>
+                            @endif
 
-                        </tr>
+                        </td>
 
-                    @endforeach
+                        <td class="p-5">
 
-                </tbody>
+                            {{ $sale->stock->tea_name }}
 
-            </table>
+                        </td>
 
-        </div>
+                        <td class="p-5">
+
+                            {{ $sale->quantity }} KG
+
+                        </td>
+
+                        <td class="p-5">
+
+                            ₹ {{ number_format($sale->price_per_kg, 2) }}
+
+                        </td>
+
+                        <td class="p-5 font-bold text-green-600">
+
+                            ₹ {{ number_format($sale->total_amount, 2) }}
+
+                        </td>
+
+                        <td class="p-5">
+
+                            {{ \Carbon\Carbon::parse($sale->sale_date)->format('d-m-Y') }}
+
+                        </td>
+
+                        <td class="p-5">
+
+                            <a href="{{ route('sales.invoice', $sale->id) }}"
+                                class="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-xl">
+
+                                Invoice
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                @empty
+
+                    <tr>
+
+                        <td colspan="9" class="text-center py-10 text-gray-500">
+
+                            No Sales Found
+
+                        </td>
+
+                    </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
 
     </div>
+
+</div>
 
 @endsection

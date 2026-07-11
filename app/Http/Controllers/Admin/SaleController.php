@@ -12,6 +12,8 @@ use App\Models\Stock;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 
+use App\Mail\InvoiceMail;
+
 class SaleController extends Controller
 {
     /*
@@ -173,7 +175,6 @@ class SaleController extends Controller
     | SEND MAIL
     |--------------------------------------------------------------------------
     */
-
     public function sendMail($id)
     {
         $sale = Sale::with([
@@ -182,83 +183,53 @@ class SaleController extends Controller
         ])->findOrFail($id);
 
         if (!$sale->dealer) {
-
             return redirect()
                 ->back()
-                ->with(
-                    'error',
-                    'Dealer not found'
-                );
+                ->with('error', 'Dealer not found');
         }
 
         if (!$sale->dealer->email) {
-
             return redirect()
                 ->back()
-                ->with(
-                    'error',
-                    'Dealer email not found'
-                );
+                ->with('error', 'Dealer email not found');
         }
 
         try {
 
-            Mail::raw(
-
-                "Dear " . $sale->dealer->name .
-
-                "\n\nYour invoice has been generated successfully." .
-
-                "\n\nInvoice No: " .
-                ($sale->invoice_number ?? ('INV-' . $sale->id)) .
-
-                "\nTea: " .
-                $sale->stock->tea_name .
-
-                "\nQuantity: " .
-                $sale->quantity . " KG" .
-
-                "\nTotal Amount: ₹" .
-                number_format($sale->total_amount, 2) .
-
-                "\n\nThank you for doing business with Bhagyraj Tea." .
-
-                "\nWebsite: https://bhagyrajtea.com/" .
-
-                "\nPhone: +91 9875858984",
-
-                function ($message) use ($sale) {
-
-                    $message->to(
-                        $sale->dealer->email
-                    )
-
-                        ->subject(
-                            'Bhagyraj Tea Invoice'
-                        );
-                }
-
+            // Generate PDF
+            $pdf = Pdf::loadView(
+                'admin.sales.invoice-pdf',
+                compact('sale')
             );
 
-            $sale->email_sent = 1;
+            // Email body
+            $body =
+                "Dear {$sale->dealer->name}\n\n" .
+                "Your invoice has been generated successfully.\n\n" .
+                "Invoice No: " . ($sale->invoice_number ?? ('INV-' . $sale->id)) . "\n" .
+                "Tea: {$sale->stock->tea_name}\n" .
+                "Quantity: {$sale->quantity} KG\n" .
+                "Total Amount: ₹" . number_format($sale->total_amount, 2) . "\n\n" .
+                "Thank you for doing business with Bhagyraj Tea.\n\n" .
+                "Website: https://bhagyrajtea.com/\n" .
+                "Phone: +91 9875858984";
 
+            Mail::to($sale->dealer->email)
+                ->send(new InvoiceMail($sale));
+
+            $sale->email_sent = 1;
             $sale->save();
 
             return redirect()
                 ->back()
-                ->with(
-                    'success',
-                    'Invoice email sent successfully'
-                );
+                ->with('success', 'Invoice email sent successfully');
 
         } catch (\Exception $e) {
 
             return redirect()
                 ->back()
-                ->with(
-                    'error',
-                    $e->getMessage()
-                );
+                ->with('error', $e->getMessage());
+
         }
     }
 }

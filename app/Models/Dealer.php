@@ -8,14 +8,34 @@ class Dealer extends Model
 {
     protected $fillable = [
 
+        'user_id',
+
         'name',
+
         'shop_name',
+
         'mobile',
+
         'email',
+
         'address',
+
         'status',
 
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | USER RELATION
+    |--------------------------------------------------------------------------
+    */
+
+    public function user()
+    {
+        return $this->belongsTo(
+            User::class
+        );
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -25,7 +45,9 @@ class Dealer extends Model
 
     public function sales()
     {
-        return $this->hasMany(Sale::class);
+        return $this->hasMany(
+            Sale::class
+        );
     }
 
     /*
@@ -36,7 +58,9 @@ class Dealer extends Model
 
     public function payments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(
+            Payment::class
+        );
     }
 
     /*
@@ -73,23 +97,8 @@ class Dealer extends Model
 
     public function remainingBalance()
     {
-        return (
-            $this->totalPurchase()
+        return $this->totalPurchase()
             -
-            $this->totalPayment()
-        );
-    }
-
-    /*
-|--------------------------------------------------------------------------
-| USER RELATION
-|--------------------------------------------------------------------------
-*/
-
-    public function user()
-    {
-        return $this->belongsTo(
-            User::class
-        );
+            $this->totalPayment();
     }
 }

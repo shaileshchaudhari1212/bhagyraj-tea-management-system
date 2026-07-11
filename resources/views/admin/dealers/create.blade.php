@@ -2,72 +2,82 @@
 
 @section('content')
 
-    <div class="p-6">
+    @if ($errors->any())
+        <div class="bg-red-100 border border-red-300 text-red-700 p-4 rounded mb-4">
+            <ul class="list-disc ml-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        <h1 class="text-3xl font-bold mb-6">
-            Add Dealer
-        </h1>
+        <div class="p-6">
 
-        <form action="{{ route('dealers.store') }}" method="POST">
+            <h1 class="text-3xl font-bold mb-6">
+                Add Dealer
+            </h1>
 
-            @csrf
+            <form action="{{ route('dealers.store') }}" method="POST">
 
-            <div class="bg-white p-6 rounded shadow space-y-4">
+                @csrf
 
-                <div>
-                    <label>Name</label>
+                <div class="bg-white p-6 rounded shadow space-y-4">
 
-                    <input type="text" name="name" class="w-full border rounded p-2">
+                    <div>
+                        <label>Name</label>
+
+                        <input type="text" name="name" class="w-full border rounded p-2">
+                    </div>
+
+                    <div>
+                        <label>Shop Name</label>
+
+                        <input type="text" name="shop_name" class="w-full border rounded p-2">
+                    </div>
+
+                    <div>
+                        <label>Mobile</label>
+
+                        <input type="text" name="mobile" class="w-full border rounded p-2">
+                    </div>
+
+                    <div>
+                        <label>Email</label>
+
+                        <input type="email" name="email" class="w-full border rounded p-2">
+                    </div>
+
+                    <div>
+                        <label>Address</label>
+
+                        <textarea name="address" class="w-full border rounded p-2"></textarea>
+                    </div>
+
+                    <div>
+                        <label>Status</label>
+
+                        <select name="status" class="w-full border rounded p-2">
+
+                            <option value="active">
+                                Active
+                            </option>
+
+                            <option value="inactive">
+                                Inactive
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <button class="bg-black hover:bg-gray-800 text-white px-5 py-3 rounded-xl transition">
+                        Save Dealer
+                    </button>
+
                 </div>
 
-                <div>
-                    <label>Shop Name</label>
+            </form>
 
-                    <input type="text" name="shop_name" class="w-full border rounded p-2">
-                </div>
-
-                <div>
-                    <label>Mobile</label>
-
-                    <input type="text" name="mobile" class="w-full border rounded p-2">
-                </div>
-
-                <div>
-                    <label>Email</label>
-
-                    <input type="email" name="email" class="w-full border rounded p-2">
-                </div>
-
-                <div>
-                    <label>Address</label>
-
-                    <textarea name="address" class="w-full border rounded p-2"></textarea>
-                </div>
-
-                <div>
-                    <label>Status</label>
-
-                    <select name="status" class="w-full border rounded p-2">
-
-                        <option value="active">
-                            Active
-                        </option>
-
-                        <option value="inactive">
-                            Inactive
-                        </option>
-
-                    </select>
-                </div>
-
-                <button class="bg-black hover:bg-gray-800 text-white px-5 py-3 rounded-xl transition">
-                    Save Dealer
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
+        </div>
 
 @endsection

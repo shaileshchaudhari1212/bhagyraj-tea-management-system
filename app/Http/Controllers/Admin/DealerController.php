@@ -3,10 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Dealer;
-use Illuminate\Http\Request;
-use App\Models\Sale;
 use App\Models\Payment;
+use App\Models\Sale;
+use App\Models\User;
+
+use App\Mail\WelcomeDealerMail;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class DealerController extends Controller
 {
@@ -30,22 +39,23 @@ class DealerController extends Controller
                     "%{$search}%"
                 )
 
-                    ->orWhere(
-                        'shop_name',
-                        'LIKE',
-                        "%{$search}%"
-                    )
+                ->orWhere(
+                    'shop_name',
+                    'LIKE',
+                    "%{$search}%"
+                )
 
-                    ->orWhere(
-                        'mobile',
-                        'LIKE',
-                        "%{$search}%"
-                    );
+                ->orWhere(
+                    'mobile',
+                    'LIKE',
+                    "%{$search}%"
+                );
             }
         )
 
-            ->latest()
-            ->get();
+        ->latest()
+
+        ->get();
 
         return view(
             'admin.dealers.index',
@@ -78,35 +88,132 @@ class DealerController extends Controller
         $request->validate([
 
             'name' => 'required',
+
             'shop_name' => 'required',
+
             'mobile' => 'required|unique:dealers',
+
             'email' => 'required|email|unique:dealers',
 
         ]);
 
-        Dealer::create([
+        DB::beginTransaction();
 
-            'name' => $request->name,
-            'shop_name' => $request->shop_name,
-            'mobile' => $request->mobile,
-            'email' => $request->email,
-            'address' => $request->address,
-            'status' => $request->status,
+        try {
 
-        ]);
+            /*
+            |--------------------------------------------------------------------------
+            | GENERATE TEMP PASSWORD
+            |--------------------------------------------------------------------------
+            */
 
-        activityLog(
-            'Create',
-            'Dealer',
-            'New Dealer Added'
-        );
+            $temporaryPassword = Str::random(10);
 
-        return redirect()
-            ->route('dealers.index')
-            ->with(
-                'success',
-                'Dealer Added Successfully'
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE USER
+            |--------------------------------------------------------------------------
+            */
+
+            $user = User::create([
+
+                'name' => $request->name,
+
+                'email' => $request->email,
+
+                'password' => Hash::make(
+                    $temporaryPassword
+                ),
+
+                'role' => 'dealer',
+
+                'must_change_password' => true,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE DEALER
+            |--------------------------------------------------------------------------
+            */
+
+            $dealer = Dealer::create([
+
+                'user_id' => $user->id,
+
+                'name' => $request->name,
+
+                'shop_name' => $request->shop_name,
+
+                'mobile' => $request->mobile,
+
+                'email' => $request->email,
+
+                'address' => $request->address,
+
+                'status' => $request->status,
+
+            ]);
+
+            /*
+            |--------------------------------------------------------------------------
+            | SEND WELCOME EMAIL
+            |--------------------------------------------------------------------------
+            */
+
+            Mail::to($dealer->email)->send(
+
+                new WelcomeDealerMail(
+
+                    $dealer,
+
+                    $temporaryPassword
+
+                )
+
             );
+
+            activityLog(
+
+                'Create',
+
+                'Dealer',
+
+                'New Dealer Added'
+
+            );
+
+            DB::commit();
+
+            return redirect()
+
+                ->route('dealers.index')
+
+                ->with(
+
+                    'success',
+
+                    'Dealer Added Successfully. Login credentials have been emailed.'
+
+                );
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()
+
+                ->withInput()
+
+                ->with(
+
+                    'error',
+
+                    $e->getMessage()
+
+                );
+
+        }
     }
 
     /*
@@ -126,10 +233,10 @@ class DealerController extends Controller
     }
 
     /*
-    |--------------------------------------------------------------------------
-    | UPDATE DEALER
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| UPDATE DEALER
+|--------------------------------------------------------------------------
+*/
 
     public function update(Request $request, $id)
     {
@@ -138,35 +245,100 @@ class DealerController extends Controller
         $request->validate([
 
             'name' => 'required',
+
             'shop_name' => 'required',
-            'mobile' => 'required',
-            'email' => 'required|email',
+
+            'mobile' => 'required|unique:dealers,mobile,' . $dealer->id,
+
+            'email' => 'required|email|unique:dealers,email,' . $dealer->id,
 
         ]);
 
-        $dealer->update([
+        DB::beginTransaction();
 
-            'name' => $request->name,
-            'shop_name' => $request->shop_name,
-            'mobile' => $request->mobile,
-            'email' => $request->email,
-            'address' => $request->address,
-            'status' => $request->status,
+        try {
 
-        ]);
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE USER
+            |--------------------------------------------------------------------------
+            */
 
-        activityLog(
-            'Update',
-            'Dealer',
-            'Dealer Updated'
-        );
+            if ($dealer->user) {
 
-        return redirect()
-            ->route('dealers.index')
-            ->with(
-                'success',
-                'Dealer Updated Successfully'
+                $dealer->user->update([
+
+                    'name' => $request->name,
+
+                    'email' => $request->email,
+
+                ]);
+
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE DEALER
+            |--------------------------------------------------------------------------
+            */
+
+            $dealer->update([
+
+                'name' => $request->name,
+
+                'shop_name' => $request->shop_name,
+
+                'mobile' => $request->mobile,
+
+                'email' => $request->email,
+
+                'address' => $request->address,
+
+                'status' => $request->status,
+
+            ]);
+
+            activityLog(
+
+                'Update',
+
+                'Dealer',
+
+                'Dealer Updated'
+
             );
+
+            DB::commit();
+
+            return redirect()
+
+                ->route('dealers.index')
+
+                ->with(
+
+                    'success',
+
+                    'Dealer Updated Successfully'
+
+                );
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()
+
+                ->withInput()
+
+                ->with(
+
+                    'error',
+
+                    $e->getMessage()
+
+                );
+
+        }
     }
 
     /*
@@ -227,6 +399,7 @@ class DealerController extends Controller
                 $sale->pending_amount = $sale->total_amount;
 
                 $sale->payment_status = 'Pending';
+
             }
         }
 
@@ -268,21 +441,64 @@ class DealerController extends Controller
 
     public function destroy($id)
     {
-        $dealer = Dealer::findOrFail($id);
+        DB::beginTransaction();
 
-        activityLog(
-            'Delete',
-            'Dealer',
-            'Dealer Deleted'
-        );
+        try {
 
-        $dealer->delete();
+            $dealer = Dealer::findOrFail($id);
 
-        return redirect()
-            ->route('dealers.index')
-            ->with(
-                'success',
-                'Dealer Deleted Successfully'
+            /*
+            |--------------------------------------------------------------------------
+            | DELETE USER ACCOUNT
+            |--------------------------------------------------------------------------
+            */
+
+            if ($dealer->user) {
+
+                $dealer->user->delete();
+
+            }
+
+            activityLog(
+
+                'Delete',
+
+                'Dealer',
+
+                'Dealer Deleted'
+
             );
+
+            $dealer->delete();
+
+            DB::commit();
+
+            return redirect()
+
+                ->route('dealers.index')
+
+                ->with(
+
+                    'success',
+
+                    'Dealer Deleted Successfully'
+
+                );
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return back()
+
+                ->with(
+
+                    'error',
+
+                    $e->getMessage()
+
+                );
+
+        }
     }
 }
